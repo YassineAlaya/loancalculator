@@ -2,27 +2,30 @@
     <div class="dt_header">
         <div class="dt_title">Welcome to Our Loan Calculator</div>
         <div class="dt_description">Find out the maximum loan you can afford based on your monthly salary and expenses.</div>
+        <hr>
     </div>
     <div class="dt_inputCard">
-        <h1>Loan Info</h1>
-        <div>
+
+        <div id="div_salary">
             <label for="dt_salary">Monthly Salary:</label>
             <input type="number" id="dt_salary" onkeyup="dt_calculateAffordableLoan()">
         </div>
-        <div>
-            <label for="dt_fees">Other Monthly Fees:</label>
+        <div id="div_fees">
+            <label for="dt_fees">Monthly Fees:</label>
             <input type="number" id="dt_fees" onkeyup="dt_calculateAffordableLoan()">
         </div>
         <div id="dt_interestRate">
             <label for="dt_interest">Interest Rate:</label>
-            <input type="number" id="dt_interest" onkeyup="dt_calculateAffordableLoan()">
+            <div id="dv_button">
+                <input type="number" id="dt_interest" onkeyup="dt_calculateAffordableLoan()">
+                <input type="button" value="Calculate" id="cal_button">
+            </div>
+        </div>
+        <div ">
         </div>
         <div id="dt_monthlyPayment"></div>
     </div>
     <div class="dt_results" id="dt_result"></div>
-    <div class="dt_linkToBlog">
-        <a href="https://al-mindhar.com/prixdem" class="dt_linkButton">Price of m² map</a>
-    </div>
 </div>
 
 <style>
@@ -43,19 +46,49 @@
     }
 
     .dt_title {
-        font-size: 24px;
-        margin-bottom: 8px;
-        color: #004272;
+        font-size: 30px;
+        margin-bottom: 18px;
+        font-weight: 500;
+        padding: 5% 0% 5% 0%;
+        color: #fff;
+        background-color: #004272;
     }
 
     .dt_description {
-font-size: 18px;
+        font-size: 18px;
         margin-bottom: 16px;
+        padding: 2.5% 5% 2.5% 5%;
+    }
+
+    hr {
+        margin: 2.5% 0% 5% 0%;
     }
 
     h1 {
         text-align: center;
         margin-bottom: 25px;
+    }
+
+    .dt_inputCard {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    #div_salary {
+        width: 47.5%;
+    }
+
+    #div_fees {
+        width: 47.5%;
+    }
+
+    #dt_interestRate {
+        width: 100%;
+    }
+
+    #dt_interest {
+        width: 47.5%;
     }
 
     label {
@@ -69,6 +102,20 @@ font-size: 18px;
         padding: 10px;
         margin-bottom: 15px;
         border: 1px solid #004272;
+        border-radius: 4px;
+    }
+
+    #dv_button {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    #cal_button {
+        width: 47.5%;
+        color: #ffffff;
+        background-color: #004272;
+        border: none;
+        font-weight: 700;
         border-radius: 4px;
     }
 
@@ -90,6 +137,7 @@ font-size: 18px;
         border: 1px solid #004272;
         border-radius: 4px;
         transition: transform 0.3s;
+        background-color: #f8f8f8;
     }
 
     .dt_loanCard:hover {
@@ -129,30 +177,38 @@ font-size: 18px;
 </style>
 
 <script>
-
+    // Function to initialize cards without calculation
     function dt_initCards() {
         const loanTerms = [5, 7, 10, 15, 20, 25];
         const resultContainer = document.getElementById('dt_result');
+        resultContainer.innerHTML = ''; // Clear previous results
         loanTerms.forEach(term => {
             const card = dt_createLoanCard(term, 0);
             resultContainer.appendChild(card);
         });
     }
 
-    function dt_calculateAffordableLoan() {
+    // Function to perform calculations and update the results
+    function dt_calculateAndDisplayLoans() {
         const monthlySalary = parseFloat(document.getElementById('dt_salary').value) || 0;
         const monthlyFees = parseFloat(document.getElementById('dt_fees').value) || 0;
-        const dt_interestRate = parseFloat(document.getElementById('dt_interest').value)/100 || 0.11;
+        const dt_interestRate = parseFloat(document.getElementById('dt_interest').value) / 100 || 0.11;
         const disposableIncome = monthlySalary - monthlyFees;
-        const maxMonthlyPayment = disposableIncome * 0.3;
+        const maxMonthlyPayment = disposableIncome * 0.4;
         document.getElementById('dt_monthlyPayment').textContent = `Possible Monthly Payment: ${maxMonthlyPayment.toFixed(2)} DT`;
+        
         const loanTerms = [5, 7, 10, 15, 20, 25];
-        loanTerms.forEach((term, index) => {
+        const resultContainer = document.getElementById('dt_result');
+        resultContainer.innerHTML = ''; // Clear previous results
+
+        loanTerms.forEach(term => {
             const principal = dt_calculatePrincipal(maxMonthlyPayment, term, dt_interestRate);
-            document.querySelectorAll('.dt_loanCard')[index].querySelector('span').textContent = `${principal.toFixed(2)} DT`;
+            const card = dt_createLoanCard(term, principal);
+            resultContainer.appendChild(card);
         });
     }
 
+    // Function to calculate the principal based on inputs
     function dt_calculatePrincipal(payment, years, rate) {
         const r = rate / 12;
         const n = years * 12;
@@ -160,29 +216,30 @@ font-size: 18px;
         return principal;
     }
 
+    // Function to create a loan card
     function dt_createLoanCard(years, principal) {
-    const card = document.createElement('div');
-    card.className = 'dt_loanCard';
-    const heading = document.createElement('h3');
-    heading.textContent = `${years} Years`;
-    
-    const label = document.createElement('p');
-    label.textContent = 'Maximum Loan: ';
-    
-    const amount = document.createElement('span');
-    amount.textContent = ` ${principal.toFixed(2)} DT`;
+        const card = document.createElement('div');
+        card.className = 'dt_loanCard';
+        const heading = document.createElement('h3');
+        heading.textContent = `${years} Years`;
 
-    // Apply CSS styles to format the label and amount
-    amount.style.fontWeight = 'light';
-    amount.style.fontSize = '18px';
+        const label = document.createElement('p');
+        label.textContent = 'Maximum Loan: ';
 
-    card.appendChild(heading);
-    card.appendChild(label);
-    label.appendChild(amount);
-    return card;
+        const amount = document.createElement('span');
+        amount.textContent = ` ${principal.toFixed(2)} DT`;
+
+        card.appendChild(heading);
+        card.appendChild(label);
+        label.appendChild(amount);
+        return card;
     }
 
-    document.getElementById('dt_salary').addEventListener('input', dt_calculateAffordableLoan);
-    document.getElementById('dt_fees').addEventListener('input', dt_calculateAffordableLoan);
-    dt_initCards();
+    // Initialize the cards on page load without calculation
+    window.onload = function () {
+        dt_initCards();
+    };
+
+    // Attach event listener to Calculate button
+    document.getElementById('cal_button').addEventListener('click', dt_calculateAndDisplayLoans);
 </script>
